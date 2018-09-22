@@ -7,6 +7,6 @@ public class Mastermind {
 		} catch(Exception e) {
 			System.err.println(e.toString());
 		}
+		GUI game = new GUI(10,4);
 	}
-	GUI game = new GUI(10,4);
 }

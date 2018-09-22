@@ -8,6 +8,7 @@ import java.awt.Dimension;
 
 import java.io.InputStream;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -17,11 +18,12 @@ public class GUI extends JFrame implements ActionListener{
 	private int guessNum, codeSize, turnCount;
 	private CodeBreaker ai;
 	private Color[] colours;
-	private JPanel topPanel, numPanel, keyPand, guessPanel, bottomPanel;
+	private JPanel topPanel, numPanel, keyPanel, guessPanel, bottomPanel;
 	private JButton[] viewColours;
 	private JButton[][] guessPegs, keyPegs;
 	private JButton next;
-	private boolean userPlays, smartAI, gameOver;
+	private boolean userPlays, gameOver;
+	private String title;
 	
 	public GUI(int gn, int cs) {
 		gameMode();
@@ -30,6 +32,7 @@ public class GUI extends JFrame implements ActionListener{
 		codeSize = cs;
 		turnCount = 0;
 		colours = new Color[]{Color.red, Color.orange, Color.yellow, Color.green, Color.blue, Color.pink};
+		title = "Mastermind";
 		panelSetup();
 		buttonSetup();
 		windowSetup();
@@ -37,7 +40,7 @@ public class GUI extends JFrame implements ActionListener{
 	}
 	
 	private void gameMode() {
-		Object[] options = {"Codebreaker", "Naive AI", "Smart AI"};
+		Object[] options = {"Codebreaker", "Mastermind"};
 		int dialog = JOptionPane.showOptionDialog(
 				null,
 				"Select a game mode",
@@ -46,15 +49,15 @@ public class GUI extends JFrame implements ActionListener{
 				JOptionPane.PLAIN_MESSAGE,
 				null,
 				options,
-				options[2]);
+				options[1]);
 		if(dialog == JOptionPane.YES_OPTION) {
 			userPlays = true;
 		}
 		if(dialog == JOptionPane.NO_OPTION) {
-			smartAI = false;
+			userPlays = false;
 		}
 		if(dialog == JOptionPane.CANCEL_OPTION) {
-			smartAI = true;
+			dispose();
 		}
 	}
 	
@@ -75,6 +78,32 @@ public class GUI extends JFrame implements ActionListener{
 	}
 	
 	private void panelSetup() {
+		topPanel = new JPanel();
+		numPanel = new JPanel();
+		keyPanel = new JPanel();
+		guessPanel  = new JPanel();
+		bottomPanel = new JPanel();
+		
+		topPanel.setLayout(new FlowLayout());
+		topPanel.setBorder(BorderFactory.createEmptyBorder(20,28,0,12));
+		topPanel.setVisible(true);
+		
+		numPanel.setLayout(new GridLayout(guessNum,1,0,10));
+		numPanel.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
+		numPanel.setVisible(true);
+		
+		keyPanel.setLayout(new GridLayout(guessNum,codeSize,0,10));
+		keyPanel.setBorder(BorderFactory.createEmptyBorder(20,20,20,40));
+		keyPanel.setPreferredSize(new Dimension(160,400));
+		keyPanel.setVisible(true);
+		
+		guessPanel.setLayout(new GridLayout(guessNum,codeSize,0,10));
+		guessPanel.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
+		guessPanel.setVisible(true);
+		
+		bottomPanel.setLayout(new FlowLayout());
+		bottomPanel.setBorder(BorderFactory.createEmptyBorder(2,20,15,20));
+		bottomPanel.setVisible(true);
 	}
 	
 	private void buttonSetup() {
@@ -82,7 +111,10 @@ public class GUI extends JFrame implements ActionListener{
 	}
 	
 	private void windowSetup() {
-		
+		setLayout(new BorderLayout());
+		setTitle(title);
+		setDefaultCloseOperation(3);
+		setMinimumSize(new Dimension(350, 500));
 	}
 	
 	private class guessColour implements ActionListener {
