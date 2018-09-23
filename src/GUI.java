@@ -11,12 +11,13 @@ import java.io.InputStream;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class GUI extends JFrame implements ActionListener{
 	private int guessNum, codeSize, turnCount;
-	private CodeBreaker ai;
+	private AI ai;
 	private Color[] colours;
 	private JPanel topPanel, numPanel, keyPanel, guessPanel, bottomPanel;
 	private JButton[] viewColours;
@@ -27,7 +28,7 @@ public class GUI extends JFrame implements ActionListener{
 	
 	public GUI(int gn, int cs) {
 		gameMode();
-		ai = new CodeBreaker();
+		ai = new AI();
 		guessNum = gn;
 		codeSize = cs;
 		turnCount = 0;
@@ -39,8 +40,11 @@ public class GUI extends JFrame implements ActionListener{
 		setVisible(true);
 	}
 	
+	// Allows user to choose which game mode to play
 	private void gameMode() {
-		Object[] options = {"Codebreaker", "Mastermind"};
+		Object[] options = {"Codebreaker", "Mastermind"}; // Option names
+		
+		// Options box
 		int dialog = JOptionPane.showOptionDialog(
 				null,
 				"Select a game mode",
@@ -50,14 +54,15 @@ public class GUI extends JFrame implements ActionListener{
 				null,
 				options,
 				options[1]);
+		
+		//  User plays as the Decoder
 		if(dialog == JOptionPane.YES_OPTION) {
 			userPlays = true;
 		}
+		
+		// User plays as the Mastermind
 		if(dialog == JOptionPane.NO_OPTION) {
 			userPlays = false;
-		}
-		if(dialog == JOptionPane.CANCEL_OPTION) {
-			dispose();
 		}
 	}
 	
@@ -78,43 +83,85 @@ public class GUI extends JFrame implements ActionListener{
 	}
 	
 	private void panelSetup() {
+		// Initialize panels
 		topPanel = new JPanel();
 		numPanel = new JPanel();
 		keyPanel = new JPanel();
 		guessPanel  = new JPanel();
 		bottomPanel = new JPanel();
 		
+		// Button layout 
 		topPanel.setLayout(new FlowLayout());
 		topPanel.setBorder(BorderFactory.createEmptyBorder(20,28,0,12));
-		topPanel.setVisible(true);
-		
+		topPanel.setVisible(true);		
 		numPanel.setLayout(new GridLayout(guessNum,1,0,10));
 		numPanel.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
-		numPanel.setVisible(true);
-		
+		numPanel.setVisible(true);		
 		keyPanel.setLayout(new GridLayout(guessNum,codeSize,0,10));
 		keyPanel.setBorder(BorderFactory.createEmptyBorder(20,20,20,40));
 		keyPanel.setPreferredSize(new Dimension(160,400));
-		keyPanel.setVisible(true);
-		
+		keyPanel.setVisible(true);		
 		guessPanel.setLayout(new GridLayout(guessNum,codeSize,0,10));
 		guessPanel.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
-		guessPanel.setVisible(true);
-		
+		guessPanel.setVisible(true);		
 		bottomPanel.setLayout(new FlowLayout());
 		bottomPanel.setBorder(BorderFactory.createEmptyBorder(2,20,15,20));
 		bottomPanel.setVisible(true);
 	}
 	
 	private void buttonSetup() {
+		// Initialize buttons
+		viewColours = new JButton[6];
+		guessPegs = new JButton[guessNum][codeSize];
+		keyPegs = new JButton[guessNum][codeSize];
+		next = new JButton("Start");
 		
+		next.addActionListener(this); // Changes button from "Start" to "next"
+		bottomPanel.add(next); // Adds button to the bottom of the window
+		
+		// Set colour of buttons
+		for(int i = 0; i < 6; i++) {
+			viewColours[i] = new JButton();
+			viewColours[i].setBackground(colours[i]);
+			viewColours[i].setEnabled(true);
+			topPanel.add(viewColours[i]);
+		}
+		
+		// button layout & functionality
+		for(int i = 0; i < guessNum; i++) {
+			numPanel.add(new JLabel(String.valueOf(i+1)), JLabel.CENTER);
+			for(int j = 0; j < codeSize; j++) {
+				guessPegs[i][j] = new JButton();
+				if(userPlays) {
+					guessPegs[i][j].addActionListener(new guessColour());
+					if(i > 0) {
+						guessPegs[i][j].setEnabled(false);
+					} else {
+						guessPegs[i][j].setBackground(colours[0]);
+					}
+				}
+				guessPanel.add(guessPegs[i][j]);
+				
+				keyPegs[i][j] = new JButton();
+				if(!userPlays) {
+					keyPegs[i][j].addActionListener(new keyColour());
+				}
+				keyPegs[i][j] = new JButton();
+				keyPanel.add(keyPegs[i][j]);
+			}
+		}
 	}
 	
 	private void windowSetup() {
 		setLayout(new BorderLayout());
 		setTitle(title);
 		setDefaultCloseOperation(3);
-		setMinimumSize(new Dimension(350, 500));
+		setMinimumSize(new Dimension(380, 500));
+		add(topPanel, "North");
+		add(numPanel, "West");
+		add(guessPanel, "Center");
+		add(keyPanel, "East");
+		add(bottomPanel, "South");
 	}
 	
 	private class guessColour implements ActionListener {
@@ -125,11 +172,52 @@ public class GUI extends JFrame implements ActionListener{
 		}
 		
 		public void actionPerformed(ActionEvent e) {
-			colourChk = (colourChk+1) % 6;
+			colourChk = (colourChk+1) % 6; // Increments each click. Cycles through 6 colours
 			((JButton)(e.getSource())).setBackground(colours[colourChk]);
 		}
 	}
 	
+	private class keyColour implements ActionListener {
+		public int colourChk;
+		private Color[] colourSlct;
+		
+		private keyColour() {
+			colourChk = 0;
+			colourSlct = new Color[]{Color.lightGray, Color.black, Color.white};
+		}
+		
+		public void actionPerformed(ActionEvent e) {
+			colourChk = (colourChk+1) % 3; // Increments each click. Cycles through 3 colours
+			((JButton)(e.getSource())).setBackground(colourSlct[colourChk]);
+		}
+	}
+	
 	public void actionPerformed(ActionEvent e) {
+		int[] pegs;
+		if(turnCount == 10 && !userPlays) {
+			gameOver = true;
+		}
+		if(gameOver) {
+			restartGame();
+		}
+		if(turnCount == 0) {
+			next.setText("Next");
+		}
+		if(userPlays) {
+			int[] userGuess = new int[codeSize];
+			for(int j = 0; j < codeSize; j++) {
+				guessPegs[turnCount][j].setEnabled(false);
+				if(turnCount < 9) {
+					guessPegs[turnCount+1][j].setBackground(colours[0]);
+					guessPegs[turnCount+1][j].setEnabled(true);
+				}
+				for(int i = 0; i < colours.length; i++) {
+					if(guessPegs[turnCount][j].getBackground().equals(colours[i])) {
+						userGuess[j] = i;
+					}
+				}
+			}
+			pegs = ai.calcKey(userGuess);
+		}
 	}
 }
