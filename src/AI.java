@@ -14,6 +14,10 @@ public class AI {
 		return null;
 	}
 	
+	public int[] calcGuess(int turnCount) {
+		return null;
+	}
+	
 	private int[] genCode() {
 		return null;
 	}

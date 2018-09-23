@@ -192,32 +192,94 @@ public class GUI extends JFrame implements ActionListener{
 		}
 	}
 	
+	// Game funtions
 	public void actionPerformed(ActionEvent e) {
-		int[] pegs;
+		int[] key, userGuess, aiGuess;
+		int bPeg;
+		int wPeg;
+		
+		// Ends game
 		if(turnCount == 10 && !userPlays) {
 			gameOver = true;
 		}
+		
+		// Restarts game
 		if(gameOver) {
 			restartGame();
 		}
+		
+		// Change start button to next
 		if(turnCount == 0) {
 			next.setText("Next");
 		}
+		
+		// 
 		if(userPlays) {
-			int[] userGuess = new int[codeSize];
-			for(int j = 0; j < codeSize; j++) {
-				guessPegs[turnCount][j].setEnabled(false);
+			userGuess = new int[codeSize];
+			for(int i = 0; i < codeSize; i++) {
+				guessPegs[turnCount][i].setEnabled(false); // stops previous codes being changed
+				// allows next code to be changed
 				if(turnCount < 9) {
-					guessPegs[turnCount+1][j].setBackground(colours[0]);
-					guessPegs[turnCount+1][j].setEnabled(true);
+					guessPegs[turnCount+1][i].setBackground(colours[0]);
+					guessPegs[turnCount+1][i].setEnabled(true);
 				}
-				for(int i = 0; i < colours.length; i++) {
-					if(guessPegs[turnCount][j].getBackground().equals(colours[i])) {
-						userGuess[j] = i;
+				// saves user's guess
+				for(int j = 0; j < colours.length; j++) {
+					if(guessPegs[turnCount][i].getBackground().equals(colours[j])) {
+						userGuess[i] = j;
 					}
 				}
 			}
-			pegs = ai.calcKey(userGuess);
+			key = ai.calcKey(userGuess);
+			// Adds black pegs
+			for(int j = 0; j < key.length; j++) {
+				keyPegs[turnCount][j].setBackground(Color.black);
+			}
+			// Adds white pegs
+			for(int j = 0; j < key.length; j++) {
+				keyPegs[turnCount][j].setBackground(Color.white);
+			}
+			// End game if user wins
+			if(key[0] == 4) {
+				JOptionPane.showConfirmDialog(
+						null,
+						"You Win",
+						"Mastermind",
+						JOptionPane.YES_OPTION,
+						JOptionPane.PLAIN_MESSAGE);
+				restartGame();
+			}
+			// Ends game if user is out of attemps
+			if(turnCount == 9) {
+				JOptionPane.showConfirmDialog(
+						null,
+						"You Lose",
+						"Mastermind",
+						JOptionPane.YES_OPTION,
+						JOptionPane.PLAIN_MESSAGE);
+				restartGame();
+			}
+		} else {
+			bPeg = 0;
+			wPeg = 0;
+			for(int i = 0; i < codeSize; i++) {
+				aiGuess = ai.calcGuess(turnCount);
+				guessPegs[turnCount][i].setBackground(colours[aiGuess[i]]);
+				keyPegs[turnCount][i].setBackground(Color.lightGray);
+				keyPegs[turnCount][i].setEnabled(true);
+				
+				if(turnCount > 0) {
+					if(keyPegs[turnCount-1][i].getBackground().equals(Color.black)); {
+						bPeg++;
+					}
+					if(keyPegs[turnCount-1][i].getBackground().equals(Color.white)); {
+						wPeg++;
+					}
+					keyPegs[turnCount-1][i].setEnabled(true);
+					ai.addKey(bPeg, wPeg);
+				}
+			}
 		}
+		turnCount++;
 	}
 }
