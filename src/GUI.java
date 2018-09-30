@@ -232,11 +232,11 @@ public class GUI extends JFrame implements ActionListener{
 			}
 			key = ai.calcKey(userGuess);
 			// Adds black pegs
-			for(int j = 0; j < key.length; j++) {
+			for(int j = 0; j < key[0]; j++) {
 				keyPegs[turnCount][j].setBackground(Color.black);
 			}
 			// Adds white pegs
-			for(int j = 0; j < key.length; j++) {
+			for(int j = 0; j < key[1]; j++) {
 				keyPegs[turnCount][j].setBackground(Color.white);
 			}
 			// End game if user wins
